@@ -1,16 +1,11 @@
 package config
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
-	"os"
-	"strings"
 
-	"web-backend-patal/validator"
-
-	"github.com/fsnotify/fsnotify"
-	"github.com/jinzhu/gorm"
-	"github.com/spf13/viper"
+	"github.com/kelseyhightower/envconfig"
 )
 
 var (
@@ -19,12 +14,21 @@ var (
 
 type (
 	Application struct {
-		Name    string      `json:"name"`
-		Port    string      `json:"port"`
-		Version string      `json:"version"`
-		ENV     string      `json:"env"`
-		Config  viper.Viper `json:"prog_config"`
-		DB      *gorm.DB    `json:"db"`
+		Name   string  `json:"name"`
+		Port   string  `json:"port"`
+		Config Config  `json:"app_config"`
+		DB     *sql.DB `json:"db"`
+	}
+
+	Config struct {
+		Port        string `envconfig:"APPPORT"`
+		JWT         string `envconfig:"JWT_SECRET"`
+		DB_Host     string `envconfig:"DB_HOST"`
+		DB_Username string `envconfig:"DB_USERNAME"`
+		DB_Port     string `envconfig:"DB_PORT"`
+		DB_Password string `envconfig:"DB_PASSWORD"`
+		DB_Name     string `envconfig:"DB_NAME"`
+		DB_SSL      string `envconfig:"DB_SSL"`
 	}
 )
 
@@ -33,7 +37,6 @@ func init() {
 	var err error
 	App = &Application{}
 	App.Name = "Palembang digital"
-	App.Version = os.Getenv("APPVER")
 	if err = App.LoadConfigs(); err != nil {
 		log.Printf("Load config error : %v", err)
 	}
@@ -41,11 +44,6 @@ func init() {
 		log.Printf("DB init error : %v", err)
 	}
 
-	// apply custom validator
-	App.Port = App.Config.GetString("port")
-	App.ENV = App.Config.GetString("env")
-	v := validator.Validator{DB: App.DB}
-	v.CustomValidatorRules()
 }
 
 func (x *Application) Close() (err error) {
@@ -58,44 +56,29 @@ func (x *Application) Close() (err error) {
 
 // Loads general configs
 func (x *Application) LoadConfigs() error {
-	var conf *viper.Viper
 
-	conf = viper.New()
-	conf.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
-	conf.AutomaticEnv()
-	conf.SetConfigName("config")
-	conf.AddConfigPath(".")
-	conf.SetConfigType("yaml")
-	if err := conf.ReadInConfig(); err != nil {
-		return err
-	}
-	conf.WatchConfig()
-	conf.OnConfigChange(func(e fsnotify.Event) {
-		log.Println("App Config file changed %s:", e.Name)
-		x.LoadConfigs()
-	})
-	x.Config = viper.Viper(*conf)
-	return nil
+	err := envconfig.Process("patal", &x.Config)
+
+	return err
 }
 
 // Loads DBinit configs
 func (x *Application) DBinit() error {
-	dbconf := x.Config.GetStringMap(fmt.Sprintf("database"))
-	Cons := DBConfig{
-		Adapter:        MysqlAdapter,
-		Host:           dbconf["host"].(string),
-		Port:           dbconf["port"].(string),
-		Username:       dbconf["username"].(string),
-		Password:       dbconf["password"].(string),
-		Table:          dbconf["table"].(string),
-		Timezone:       dbconf["timezone"].(string),
-		Maxlifetime:    dbconf["maxlifetime"].(int),
-		IdleConnection: dbconf["idle_conns"].(int),
-		OpenConnection: dbconf["open_conns"].(int),
-		SSL:            dbconf["sslmode"].(string),
-		Logmode:        dbconf["logmode"].(bool),
+	conf := x.Config
+
+	connectionString := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", conf.DB_Username, conf.DB_Password, conf.DB_Host, conf.DB_Port, conf.DB_Name, conf.DB_SSL)
+
+	db, err := sql.Open("postgres", connectionString)
+	if err != nil {
+		return err
 	}
-	Start(Cons)
-	x.DB = DB
+
+	err = db.Ping()
+	if err != nil {
+		return err // proper error handling instead of panic
+	}
+	// db.SetMaxOpenConns(dbconf["dbMaxConns"].(int))
+	// db.SetMaxIdleConns(dbconf["dbMaxIdleConns"].(int))
+	x.DB = db
 	return nil
 }
