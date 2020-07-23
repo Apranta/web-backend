@@ -1,11 +1,24 @@
 package config
 
 import (
+<<<<<<< HEAD
 	"database/sql"
 	"fmt"
 	"log"
 
 	"github.com/kelseyhightower/envconfig"
+=======
+	"fmt"
+	"log"
+	"os"
+	"strings"
+
+	"web-backend-patal/validator"
+
+	"github.com/fsnotify/fsnotify"
+	"github.com/jinzhu/gorm"
+	"github.com/spf13/viper"
+>>>>>>> staging
 )
 
 var (

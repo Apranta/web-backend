@@ -29,7 +29,7 @@ type (
 		Port           string
 		Username       string
 		Password       string
-		Table          string
+		Database       string
 		Timezone       string
 		Maxlifetime    int
 		IdleConnection int
@@ -73,12 +73,12 @@ var DB *gorm.DB
 func Start(conf DBConfig) {
 	switch conf.Adapter {
 	case MysqlAdapter:
-		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Local", conf.Username, conf.Password, conf.Host, conf.Port, conf.Table)
+		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Local", conf.Username, conf.Password, conf.Host, conf.Port, conf.Database)
 		if err := DBConnect("mysql", connectionString, conf); err != nil {
 			panic(err)
 		}
 	case PostgresAdapter:
-		connectionString := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", conf.Username, conf.Password, conf.Host, conf.Port, conf.Table, conf.SSL)
+		connectionString := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", conf.Username, conf.Password, conf.Host, conf.Port, conf.Database, conf.SSL)
 		if err := DBConnect("postgres", connectionString, conf); err != nil {
 			panic(err)
 		}

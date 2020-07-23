@@ -1,16 +1,11 @@
 react_cors: true
 database:
-    table: patal
-    username: root
-    password: ""
-    host: localhost
-    port: "3306"
-    maxlifetime: 30 
-    idle_conns: 10
-    open_conns: 100
-    sslmode: disable
-    logmode: true
-    timezone: Asia/Jakarta
+    host: 'localhost'
+    port: '5432'
+    username: 'patal'
+    password: 'patal'
+    database: 'patal'
+    sslmode: 'disable'
 jwt:
     duration: 10080 # in minutes
     secret: secret

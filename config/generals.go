@@ -9,7 +9,11 @@ import (
 	"path/filepath"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/labstack/echo"
+=======
+	"github.com/labstack/echo/v4"
+>>>>>>> staging
 	"github.com/thedevsaddam/govalidator"
 )
 

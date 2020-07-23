@@ -1,0 +1,40 @@
+info:
+  contact:
+    email: support@palembangdigital.org
+    name: Palembang Digital
+    url: https://palembangdigital.org
+  description: Dokumentasi API untuk website palembangdigital.org
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: API Documentation for Palembang Digital
+  version: 0.0.1
+paths:
+  /api/accounts/login:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Authenticate the user
+      operationId: accounts-login
+      parameters:
+      - description: username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      summary: Log the user in
+      tags:
+      - accounts
+swagger: "2.0"
