@@ -1,0 +1,12 @@
+react_cors: true
+database:
+    host: 'localhost'
+    port: '5432'
+    username: 'patal'
+    password: 'patal'
+    database: 'patal'
+    sslmode: 'disable'
+jwt:
+    duration: 10080 # in minutes
+    secret: secret
+port: 8006
